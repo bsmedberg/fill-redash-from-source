@@ -1,8 +1,11 @@
 import sys, os, json
 import argparse
 import urllib2
+import time
+import pprint
 
 base_url = "https://sql.telemetry.mozilla.org/api/"
+recheck_frequency = 1
 
 def check_or_update_list(queries, user_api_key):
     def api_get(*path):
@@ -47,11 +50,26 @@ def check_or_update_list(queries, user_api_key):
             print "[{}] {}: Up to date".format(id, name)
             return
 
+        # If the query has changed, we need to generate a new result set
+        # and then associate it with the query
+        if 'query' in updates:
+            r = api_post({
+                'data_source_id': dsmap[ds]['id'],
+                'max_age': 0,
+                'query': qs,
+                'query_id': id
+            }, 'query_results')
+            job_id = r['job']['id']
+            while r['job']['status'] in (1, 2):
+                time.sleep(recheck_frequency)
+                r = api_get('jobs', job_id)
+            if r['job']['status'] != 3:
+                raise ValueError("[{}] {}: new query failed.\n{}".format(id, name, pprint.pformat(r)))
+            updates['latest_query_data_id'] = r['job']['query_result_id']
+            # do I need to update query_hash? updates['query_hash'] = r['
+
         print "[{}] {}: Updating {}".format(id, name, ','.join(updates.keys()))
         api_post(updates, 'queries', id)
-
-        if 'query' in updates:
-            api_post({}, 'queries', id, 'refresh')
 
     for q in queries:
         check_or_update_query(q)
