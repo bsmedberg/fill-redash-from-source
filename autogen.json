@@ -1,0 +1,11 @@
+{
+    "queries": [
+        {
+            "id": 318,
+            "name": "SELECT ( FROM crash_aggregates LIMIT 1",
+            "data_source": "Presto",
+            "query": "SELECT * FROM crash_aggregates LIMIT 1",
+            "api_key": "d92720bb35301e28362dcc4d94ad789dbcb32773"
+        }
+    ]
+}
