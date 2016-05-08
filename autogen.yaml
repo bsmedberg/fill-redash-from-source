@@ -1,0 +1,227 @@
+queries:
+  - id: 318
+    name: "DESCRIBE crash_aggregates"
+    data_source: "Presto"
+    query: |
+      DESCRIBE crash_aggregates
+    api_key: "d92720bb35301e28362dcc4d94ad789dbcb32773"
+  - id: 200
+    name: "FxDesktop Nightly: Crashes by Date"
+    data_source: "Presto"
+    query: |
+      WITH channel_data AS (
+        SELECT *
+        FROM crash_aggregates
+        WHERE
+          CAST(submission_date AS date) >= date_add('day', -90, current_date)
+          AND CAST(activity_date AS date) >= date_add('day', -90, current_date)
+          AND dimensions['application'] = 'Firefox'
+          AND dimensions['channel'] = 'nightly'
+          AND dimensions['experiment_id'] IS NULL
+      ),
+      crash_counts AS (
+        SELECT
+          activity_date,
+          SUM(stats['usage_hours']) / 1000 AS usage_khours,
+          SUM(stats['main_crashes']) AS main_crashes,
+          SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
+          SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
+        FROM channel_data
+        GROUP BY activity_date
+      ),
+      versions_by_date AS (
+        SELECT
+          activity_date,
+          dimensions['build_version'] AS version,
+          ROW_NUMBER() OVER (
+            PARTITION BY activity_date
+            ORDER BY SUM(stats['usage_hours']) DESC) AS rank
+        FROM channel_data
+        GROUP BY activity_date, dimensions['build_version']
+      ),
+      leading_version_by_date AS (
+        SELECT
+          activity_date,
+          version AS leading_version
+        FROM versions_by_date
+        WHERE rank = 1
+      ),
+      counts_over_time AS (
+        SELECT
+          activity_date,
+          usage_khours,
+          main_crashes,
+          content_crashes,
+          npapi_plugin_crashes,
+          media_plugin_crashes,
+          SUM(main_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS main_crashes_weekly,
+          SUM(content_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS content_crashes_weekly,
+          SUM(npapi_plugin_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS npapi_plugin_crashes_weekly,
+          SUM(media_plugin_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS media_plugin_crashes_weekly
+        FROM crash_counts
+      )
+      SELECT
+        cot.*,
+        leading_version
+      FROM
+        counts_over_time AS cot
+        LEFT OUTER JOIN leading_version_by_date AS lvbd
+          ON cot.activity_date = lvbd.activity_date
+      ORDER BY cot.activity_date ASC
+    api_key: "b6e185e0535b32b5c6da5272ae59d8f5e08da1c4"
+  - id: 199
+    name: "FxDesktop DevEdition: Crashes By Date"
+    data_source: "Presto"
+    query: |
+      WITH channel_data AS (
+        SELECT *
+        FROM crash_aggregates
+        WHERE
+          CAST(submission_date AS date) >= date_add('day', -90, current_date)
+          AND CAST(activity_date AS date) >= date_add('day', -90, current_date)
+          AND dimensions['application'] = 'Firefox'
+          AND dimensions['channel'] = 'aurora'
+          AND dimensions['experiment_id'] IS NULL
+      ),
+      crash_counts AS (
+        SELECT
+          activity_date,
+          SUM(stats['usage_hours']) / 1000 AS usage_khours,
+          SUM(stats['main_crashes']) AS main_crashes,
+          SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
+          SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
+        FROM channel_data
+        GROUP BY activity_date
+      ),
+      versions_by_date AS (
+        SELECT
+          activity_date,
+          dimensions['build_version'] AS version,
+          ROW_NUMBER() OVER (
+            PARTITION BY activity_date
+            ORDER BY SUM(stats['usage_hours']) DESC) AS rank
+        FROM channel_data
+        GROUP BY activity_date, dimensions['build_version']
+      ),
+      leading_version_by_date AS (
+        SELECT
+          activity_date,
+          version AS leading_version
+        FROM versions_by_date
+        WHERE rank = 1
+      ),
+      counts_over_time AS (
+        SELECT
+          activity_date,
+          usage_khours,
+          main_crashes,
+          content_crashes,
+          npapi_plugin_crashes,
+          media_plugin_crashes,
+          SUM(main_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS main_crashes_weekly,
+          SUM(content_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS content_crashes_weekly,
+          SUM(npapi_plugin_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS npapi_plugin_crashes_weekly,
+          SUM(media_plugin_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS media_plugin_crashes_weekly
+        FROM crash_counts
+      )
+      SELECT
+        cot.*,
+        leading_version
+      FROM
+        counts_over_time AS cot
+        LEFT OUTER JOIN leading_version_by_date AS lvbd
+          ON cot.activity_date = lvbd.activity_date
+      ORDER BY cot.activity_date ASC
+    api_key: "705e86e3e080611aa21e693ba0187190af902c8b"
+  - id: 322
+    name: "FxDesktop Beta: Crashes By Date"
+    data_source: "Presto"
+    query: |
+      WITH channel_data AS (
+        SELECT *
+        FROM crash_aggregates
+        WHERE
+          CAST(submission_date AS date) >= date_add('day', -90, current_date)
+          AND CAST(activity_date AS date) >= date_add('day', -90, current_date)
+          AND dimensions['application'] = 'Firefox'
+          AND dimensions['channel'] = 'beta'
+          AND dimensions['experiment_id'] IS NULL
+          AND (dimensions['e10s_cohort'] != 'True' OR dimensions['e10s_cohort'] IS NULL)
+      ),
+      crash_counts AS (
+        SELECT
+          activity_date,
+          SUM(stats['usage_hours']) / 1000 AS usage_khours,
+          SUM(stats['main_crashes']) AS main_crashes,
+          SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
+          SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
+        FROM channel_data
+        GROUP BY activity_date
+      ),
+      versions_by_date AS (
+        SELECT
+          activity_date,
+          dimensions['build_version'] AS version,
+          ROW_NUMBER() OVER (
+            PARTITION BY activity_date
+            ORDER BY SUM(stats['usage_hours']) DESC) AS rank
+        FROM channel_data
+        GROUP BY activity_date, dimensions['build_version']
+      ),
+      leading_version_by_date AS (
+        SELECT
+          activity_date,
+          version AS leading_version
+        FROM versions_by_date
+        WHERE rank = 1
+      ),
+      counts_over_time AS (
+        SELECT
+          activity_date,
+          usage_khours,
+          main_crashes,
+          content_crashes,
+          npapi_plugin_crashes,
+          media_plugin_crashes,
+          SUM(main_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS main_crashes_weekly,
+          SUM(content_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS content_crashes_weekly,
+          SUM(npapi_plugin_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS npapi_plugin_crashes_weekly,
+          SUM(media_plugin_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS media_plugin_crashes_weekly
+        FROM crash_counts
+      )
+      SELECT
+        cot.*,
+        leading_version
+      FROM
+        counts_over_time AS cot
+        LEFT OUTER JOIN leading_version_by_date AS lvbd
+          ON cot.activity_date = lvbd.activity_date
+      ORDER BY cot.activity_date ASC
+    api_key: "82551524acb38eb45f20d203b0004831b54c9696"

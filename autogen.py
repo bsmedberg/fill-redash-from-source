@@ -3,6 +3,7 @@ import argparse
 import urllib2
 import time
 import pprint
+import yaml
 
 base_url = "https://sql.telemetry.mozilla.org/api/"
 recheck_frequency = 1
@@ -60,9 +61,13 @@ def check_or_update_list(queries, user_api_key):
                 'query_id': id
             }, 'query_results')
             job_id = r['job']['id']
+            print "[{}] Updating query: status at {}job/{}".format(id, base_url, job_id)
             while r['job']['status'] in (1, 2):
                 time.sleep(recheck_frequency)
                 r = api_get('jobs', job_id)
+                print "*",
+                sys.stdout.flush()
+            print
             if r['job']['status'] != 3:
                 raise ValueError("[{}] {}: new query failed.\n{}".format(id, name, pprint.pformat(r)))
             updates['latest_query_data_id'] = r['job']['query_result_id']
@@ -76,9 +81,9 @@ def check_or_update_list(queries, user_api_key):
 
 if __name__ == "__main__":
     a = argparse.ArgumentParser(description="Update sql.telemetry.mozilla.org queries")
-    a.add_argument("manifest", metavar="manifest.json", help="Path to autogen.json")
+    a.add_argument("manifest", metavar="manifest.yaml", help="Path to autogen.yaml")
     a.add_argument("apikey", help="Your sql.telemetry.mozilla.org API key")
     args = a.parse_args()
 
-    d = json.load(open(args.manifest))
+    d = yaml.load(open(args.manifest))
     check_or_update_list(d['queries'], args.apikey)
