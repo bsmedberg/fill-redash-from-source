@@ -33,6 +33,7 @@ def check_or_update_list(queries, user_api_key):
         name = q['name']
         ds = q['data_source']
         qs = q['query']
+        schedule = q['schedule']
         api_key = q['api_key']
 
         updates = {}
@@ -46,6 +47,8 @@ def check_or_update_list(queries, user_api_key):
             updates['query'] = qs
         if r['api_key'] != api_key:
             raise ValueError("API key for query [{}]: {} doesn't match.".format(id, name))
+        if r['schedule'] != schedule:
+            updates['schedule'] = schedule
 
         if not len(updates):
             print "[{}] {}: Up to date".format(id, name)

@@ -2,12 +2,15 @@ queries:
   - id: 318
     name: "DESCRIBE crash_aggregates"
     data_source: "Presto"
+    schedule: null
+    api_key: "d92720bb35301e28362dcc4d94ad789dbcb32773"
     query: |
       DESCRIBE crash_aggregates
-    api_key: "d92720bb35301e28362dcc4d94ad789dbcb32773"
   - id: 200
     name: "FxDesktop Nightly: Crashes by Date"
     data_source: "Presto"
+    schedule: "08:00"
+    api_key: "b6e185e0535b32b5c6da5272ae59d8f5e08da1c4"
     query: |
       WITH channel_data AS (
         SELECT *
@@ -77,10 +80,11 @@ queries:
         LEFT OUTER JOIN leading_version_by_date AS lvbd
           ON cot.activity_date = lvbd.activity_date
       ORDER BY cot.activity_date ASC
-    api_key: "b6e185e0535b32b5c6da5272ae59d8f5e08da1c4"
   - id: 199
     name: "FxDesktop DevEdition: Crashes By Date"
     data_source: "Presto"
+    schedule: "08:00"
+    api_key: "705e86e3e080611aa21e693ba0187190af902c8b"
     query: |
       WITH channel_data AS (
         SELECT *
@@ -150,10 +154,11 @@ queries:
         LEFT OUTER JOIN leading_version_by_date AS lvbd
           ON cot.activity_date = lvbd.activity_date
       ORDER BY cot.activity_date ASC
-    api_key: "705e86e3e080611aa21e693ba0187190af902c8b"
   - id: 322
     name: "FxDesktop Beta: Crashes By Date"
     data_source: "Presto"
+    schedule: "08:00"
+    api_key: "82551524acb38eb45f20d203b0004831b54c9696"
     query: |
       WITH channel_data AS (
         SELECT *
@@ -224,10 +229,11 @@ queries:
         LEFT OUTER JOIN leading_version_by_date AS lvbd
           ON cot.activity_date = lvbd.activity_date
       ORDER BY cot.activity_date ASC
-    api_key: "82551524acb38eb45f20d203b0004831b54c9696"
   - id: 326
     name: "FxDesktop: Comparison of e10s/non-e10s crash rates"
     data_source: "Presto"
+    api_key: "d2f89374fbb282f44b299e1267f9c99771f59773"
+    schedule: "08:00"
     query: |
       WITH channel_data AS (
         SELECT *
@@ -289,4 +295,3 @@ queries:
         LEFT OUTER JOIN leading_version_by_date AS lvbd
           ON cot.activity_date = lvbd.activity_date
       ORDER BY cot.activity_date ASC
-    api_key: "d2f89374fbb282f44b299e1267f9c99771f59773"
