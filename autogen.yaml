@@ -28,6 +28,7 @@ queries:
           SUM(stats['usage_hours']) / 1000 AS usage_khours,
           SUM(stats['main_crashes']) AS main_crashes,
           SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['content_shutdown_crashes']) AS content_shutdown_crashes,
           SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
           SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
         FROM channel_data
@@ -56,6 +57,7 @@ queries:
           usage_khours,
           main_crashes,
           content_crashes,
+          content_shutdown_crashes,
           npapi_plugin_crashes,
           media_plugin_crashes,
           SUM(main_crashes) OVER
@@ -64,6 +66,9 @@ queries:
           SUM(content_crashes) OVER
             (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
             AS content_crashes_weekly,
+          SUM(content_shutdown_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS content_shutdown_crashes_weekly,
           SUM(npapi_plugin_crashes) OVER
             (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
             AS npapi_plugin_crashes_weekly,
@@ -102,6 +107,7 @@ queries:
           SUM(stats['usage_hours']) / 1000 AS usage_khours,
           SUM(stats['main_crashes']) AS main_crashes,
           SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['content_shutdown_crashes']) AS content_shutdown_crashes,
           SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
           SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
         FROM channel_data
@@ -138,6 +144,9 @@ queries:
           SUM(content_crashes) OVER
             (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
             AS content_crashes_weekly,
+          SUM(content_shutdown_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS content_shutdown_crashes_weekly,
           SUM(npapi_plugin_crashes) OVER
             (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
             AS npapi_plugin_crashes_weekly,
@@ -177,6 +186,7 @@ queries:
           SUM(stats['usage_hours']) / 1000 AS usage_khours,
           SUM(stats['main_crashes']) AS main_crashes,
           SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['content_shutdown_crashes']) AS content_shutdown_crashes,
           SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
           SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
         FROM channel_data
@@ -205,6 +215,7 @@ queries:
           usage_khours,
           main_crashes,
           content_crashes,
+          content_shutdown_crashes,
           npapi_plugin_crashes,
           media_plugin_crashes,
           SUM(main_crashes) OVER
@@ -213,6 +224,9 @@ queries:
           SUM(content_crashes) OVER
             (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
             AS content_crashes_weekly,
+          SUM(content_shutdown_crashes) OVER
+            (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+            AS content_shutdown_crashes_weekly,
           SUM(npapi_plugin_crashes) OVER
             (ORDER BY activity_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
             AS npapi_plugin_crashes_weekly,
@@ -253,6 +267,7 @@ queries:
           SUM(stats['usage_hours']) / 1000 AS usage_khours,
           SUM(stats['main_crashes']) AS main_crashes,
           SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['content_shutdown_crashes']) AS content_shutdown_crashes,
           SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
           SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
         FROM channel_data
@@ -282,6 +297,7 @@ queries:
           usage_khours,
           main_crashes,
           content_crashes,
+          content_shutdown_crashes,
           npapi_plugin_crashes,
           media_plugin_crashes
         FROM crash_counts
