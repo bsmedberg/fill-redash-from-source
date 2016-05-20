@@ -24,7 +24,7 @@ This tool does not make brand-new queries. To create a new query, you create a d
 
 * Visit https://sql.telemetry.mozilla.org/queries/new
 * Choose the data source you need (most queries use the "Presto" datasource)
-* Type in a dummary query such as `SELECT TRUE`.
+* Type in a dummy query such as `SELECT TRUE`.
 * Choose the "execute" button.
 * After the query has finished executing, choose the "Save" button.
 * The URL will change to contain the new query ID: https://sql.telemetry.mozilla.org/queries/*id*/source
