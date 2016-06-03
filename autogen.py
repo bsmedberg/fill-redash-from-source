@@ -20,7 +20,14 @@ def check_or_update_list(queries, user_api_key):
         url = base_url + '/'.join(map(str, path))
         r = urllib2.Request(url, json.dumps(d))
         r.add_header('Authorization', 'Key ' + user_api_key)
-        fd = urllib2.urlopen(r)
+        r.add_header('Content-Type', 'application/json;charset=utf-8')
+
+        try:
+            fd = urllib2.urlopen(r)
+        except urllib2.HTTPError, e:
+            print >>sys.stderr, "HTTP response"
+            print >>sys.stderr, e.read()
+            raise
         return json.load(fd)
 
     datasources = api_get('data_sources')
