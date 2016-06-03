@@ -273,6 +273,21 @@ queries:
         FROM channel_data
         GROUP BY activity_date, dimensions['e10s_cohort']
       ),
+      nonxp_crash_counts AS (
+        SELECT
+          activity_date,
+          dimensions['e10s_cohort'] || '_without_xp' AS e10s_cohort,
+          SUM(stats['usage_hours']) / 1000 AS usage_khours,
+          SUM(stats['main_crashes']) AS main_crashes,
+          SUM(stats['content_crashes']) AS content_crashes,
+          SUM(stats['content_shutdown_crashes']) AS content_shutdown_crashes,
+          SUM(stats['plugin_crashes']) AS npapi_plugin_crashes,
+          SUM(stats['gmplugin_crashes']) AS media_plugin_crashes
+        FROM channel_data
+        WHERE dimensions['os_name'] != 'Windows_NT' OR
+          TRY_CAST(SPLIT_PART(dimensions['os_version'], '.', 1) AS BIGINT) >= 6
+        GROUP BY activity_date, dimensions['e10s_cohort']
+      ),
       versions_by_date AS (
         SELECT
           activity_date,
@@ -300,7 +315,8 @@ queries:
           content_shutdown_crashes,
           npapi_plugin_crashes,
           media_plugin_crashes
-        FROM crash_counts
+        FROM (SELECT * FROM crash_counts UNION ALL
+          SELECT * FROM nonxp_crash_counts)
         WHERE usage_khours > 1000
       )
       SELECT
