@@ -259,6 +259,7 @@ queries:
           AND dimensions['channel'] = 'beta'
           AND dimensions['experiment_id'] IS NULL
           AND dimensions['e10s_cohort'] IN ('test', 'control')
+          AND date_diff('day', date_parse(SUBSTR(activity_date, 1, 10), '%Y-%m-%d'), date_parse(SUBSTR(dimensions['build_id'], 1, 8), '%Y%m%d')) < 21
       ),
       crash_counts AS (
         SELECT
